@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"mxshop-api/user-web/api/helper"
 	"mxshop-api/user-web/forms"
 	"mxshop-api/user-web/global"
@@ -17,26 +19,15 @@ import (
 )
 
 func GetUserList(c *gin.Context) {
-	//zap.S().Debug("获取用户列表页")
+	//claims, _ := c.Get("claims")
+	//currentUser := claims.(*models.CustomClaims)
+	//zap.S().Infof("访问用户的ID为%d", currentUser.ID)
 
-	//ip := "127.0.0.1"
-	//port := 50051
-	// 拨号连接用户grpc服务器
-	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserSrvInfo.Host,
-		global.ServerConfig.UserSrvInfo.Port), grpc.WithInsecure())
-	if err != nil {
-		zap.S().Errorw("[GetUserList] 连接 【用户服务】失败",
-			"msg", err.Error(),
-		)
-	}
-
-	// 调用接口
-	userSrvClient := proto.NewUserClient(userConn)
 	pn := c.DefaultQuery("pn", "0")
 	pnInt, _ := strconv.Atoi(pn)
 	pSize := c.DefaultQuery("pSize", "10")
 	pSizeInt, _ := strconv.Atoi(pSize)
-	rsp, err := userSrvClient.GetUserList(context.Background(), &proto.PageInfo{Pn: uint32(pnInt), PSize: uint32(pSizeInt)})
+	rsp, err := global.UserSrvClient.GetUserList(context.Background(), &proto.PageInfo{Pn: uint32(pnInt), PSize: uint32(pSizeInt)})
 	if err != nil {
 		zap.S().Errorw("[GetUserList] 查询 【用户列表】失败")
 		helper.HandleGrpcErrorToHttp(err, c)
@@ -73,7 +64,82 @@ func LoginByPWD(c *gin.Context) {
 		helper.HandleValidatorError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"msg": "sign in succeeded",
+
+	verifyOk := store.Verify(passwordLoginForm.CaptchaId, passwordLoginForm.Captcha, true)
+	if !verifyOk {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"captcha": "验证码错误",
+		})
+		return
+	}
+
+	// 调用接口，登陆逻辑
+	rsp, err := global.UserSrvClient.GetUserByMobile(context.Background(), &proto.MobileRequest{
+		Mobile: passwordLoginForm.Mobile,
 	})
+	if err != nil {
+		e, ok := status.FromError(err)
+		if ok {
+			switch e.Code() {
+			case codes.NotFound:
+				c.JSON(http.StatusBadRequest, gin.H{"mobile": "用户不存在"})
+			default:
+				c.JSON(http.StatusInternalServerError, gin.H{"mobile": "登陆失败"})
+			}
+		}
+	} else {
+		// 用户存在，开始校验密码
+		checkRsp, checkErr := global.UserSrvClient.CheckPassword(context.Background(), &proto.PasswordCheckInfo{
+			Password:          passwordLoginForm.Password,
+			EncryptedPassword: rsp.Password,
+		})
+		if checkErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"msg": "登陆失败"})
+		} else {
+			if checkRsp.Success {
+				// 生成token
+				helper.GenerateJWTWhenVerified(c, rsp.Id, rsp.Role, rsp.NickName)
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{"msg": "密码错误"})
+			}
+		}
+	}
+}
+
+func Register(c *gin.Context) {
+	// 表单验证
+	registerForm := forms.RegisterForm{}
+	err := c.ShouldBind(&registerForm)
+	if err != nil {
+		helper.HandleValidatorError(c, err)
+		return
+	}
+
+	//验证码
+	rdb := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%d", global.ServerConfig.RedisInfo.Host, global.ServerConfig.RedisInfo.Port),
+	})
+
+	value, err := rdb.Get(context.Background(), registerForm.Mobile).Result()
+	if err == redis.Nil || value != registerForm.Code {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": "验证码错误",
+		})
+		return
+	}
+
+	user, err := global.UserSrvClient.CreateUser(context.Background(), &proto.CreateUserInfo{
+		NickName: registerForm.Mobile,
+		Password: registerForm.PassWord,
+		Mobile:   registerForm.Mobile,
+	})
+
+	if err != nil {
+		zap.S().Errorf("[Register] 查询 【用户列表】失败: %s", err.Error())
+		helper.HandleGrpcErrorToHttp(err, c)
+		return
+	}
+
+	helper.GenerateJWTWhenVerified(c, user.Id, user.Role, user.NickName)
+
 }
