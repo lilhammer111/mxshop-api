@@ -10,6 +10,7 @@ import (
 )
 
 func SrvConn() {
+	// 服务发现
 	consulInfo := global.ServerConfig.ConsulInfo
 	userConn, err := grpc.Dial(
 		fmt.Sprintf("consul://%s:%d/%s?wait=14s",
@@ -17,14 +18,19 @@ func SrvConn() {
 			consulInfo.Port,
 			global.ServerConfig.UserSrvInfo.Name),
 		grpc.WithInsecure(),
+		// 负载均衡
 		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
 	)
 	if err != nil {
 		zap.S().Fatalln("[SrvConn] 连接 【用户服务失败】")
 	}
+
 	userSrvClient := proto.NewUserClient(userConn)
 	global.UserSrvClient = userSrvClient
 }
+
+// 问题：后续用户服务下线了或者ip,端口变了，我就需要重新发现这个服务
+// 答案：负载均衡可以解决
 
 //func SrvConn() {
 //	// 从注册中心获取到用户服务的信息

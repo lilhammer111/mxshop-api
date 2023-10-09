@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 	"mxshop-api/user-web/global"
 	"mxshop-api/user-web/initialize"
-	"mxshop-api/user-web/util"
+	"mxshop-api/user-web/utils"
 	customValidator "mxshop-api/user-web/validator"
 )
 
@@ -27,10 +27,10 @@ func main() {
 	initialize.SrvConn()
 
 	viper.AutomaticEnv()
-	// 如果是本地开发环境则端口固定
+	// 如果是本地开发环境则固定端口
 	debug := viper.GetBool("MXSHOP_DEBUG")
 	if !debug {
-		port, err := util.GetFreePort()
+		port, err := utils.GetFreePort()
 		if err == nil {
 			global.ServerConfig.Port = port
 		}
