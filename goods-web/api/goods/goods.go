@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"mxshop-api/goods-web/api/helper"
+	"mxshop-api/goods-web/forms"
 	"mxshop-api/goods-web/global"
 	"mxshop-api/goods-web/proto"
 	"net/http"
@@ -96,4 +97,36 @@ func List(c *gin.Context) {
 	reMap["data"] = goodsList
 
 	c.JSON(http.StatusOK, reMap)
+}
+
+func New(c *gin.Context) {
+	goodsForm := forms.GoodsForm{}
+
+	if err := c.ShouldBindJSON(&goodsForm); err != nil {
+		helper.HandleValidatorError(c, err)
+		return
+	}
+
+	goodsClient := global.GoodsSrvClient
+	rsp, err := goodsClient.CreateGoods(context.Background(), &proto.CreateGoodsInfo{
+		Name:            goodsForm.Name,
+		GoodsSn:         goodsForm.GoodsSn,
+		Stocks:          goodsForm.Stocks,
+		MarketPrice:     goodsForm.MarketPrice,
+		ShopPrice:       goodsForm.ShopPrice,
+		GoodsBrief:      goodsForm.GoodsBrief,
+		ShipFree:        *goodsForm.ShipFree,
+		Images:          goodsForm.Images,
+		DescImages:      goodsForm.DescImages,
+		GoodsFrontImage: goodsForm.FrontImage,
+		CategoryId:      goodsForm.CategoryId,
+		BrandId:         goodsForm.Brand,
+	})
+	if err != nil {
+		helper.HandleGrpcErrorToHttp(err, c)
+		return
+	}
+	// todo goods stock
+
+	c.JSON(http.StatusOK, rsp)
 }

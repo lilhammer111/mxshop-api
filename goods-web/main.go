@@ -47,8 +47,8 @@ func main() {
 
 	// run service
 	go func() {
-		zap.S().Debugf("在%s:%d上成功启动服务器", global.ServerConfig.Host, global.ServerConfig.Port)
-		err = r.Run(fmt.Sprintf("%s:%d", global.ServerConfig.Host, global.ServerConfig.Port))
+		zap.S().Debugf("在:%d上成功启动服务器", global.ServerConfig.Port)
+		err = r.Run(fmt.Sprintf(":%d", global.ServerConfig.Port))
 		if err != nil {
 			zap.S().Panic("启动失败：", err.Error())
 		}
