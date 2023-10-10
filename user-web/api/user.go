@@ -64,8 +64,8 @@ func LoginByPWD(c *gin.Context) {
 		helper.HandleValidatorError(c, err)
 		return
 	}
-
-	verifyOk := store.Verify(passwordLoginForm.CaptchaId, passwordLoginForm.Captcha, true)
+	// set clear false for conveniently testing
+	verifyOk := store.Verify(passwordLoginForm.CaptchaId, passwordLoginForm.Captcha, false)
 	if !verifyOk {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"captcha": "验证码错误",
