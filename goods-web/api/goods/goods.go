@@ -126,7 +126,123 @@ func New(c *gin.Context) {
 		helper.HandleGrpcErrorToHttp(err, c)
 		return
 	}
-	// todo goods stock
+	// todo goods stock - Distributed transactions 分布式事务 难点
 
 	c.JSON(http.StatusOK, rsp)
+}
+
+func Detail(c *gin.Context) {
+	id := c.Param("id")
+	idInt, err := strconv.ParseInt(id, 10, 32)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+	}
+
+	r, err := global.GoodsSrvClient.GetGoodsDetail(context.Background(), &proto.GoodInfoRequest{Id: int32(idInt)})
+	if err != nil {
+		helper.HandleGrpcErrorToHttp(err, c)
+	}
+
+	// 库存还没做
+	c.JSON(http.StatusOK, gin.H{
+		"id":          r.Id,
+		"name":        r.Name,
+		"shop_price":  r.ShopPrice,
+		"goods_brief": r.GoodsBrief,
+		"ship_free":   r.ShipFree,
+		"images":      r.Images,
+		"front_image": r.GoodsFrontImage,
+		"desc":        r.GoodsDesc,
+		"desc_images": r.DescImages,
+		"category":    gin.H{"id": r.Category.Id, "name": r.Category.Name},
+		"brand":       gin.H{"id": r.Brand.Id, "name": r.Brand.Name, "logo": r.Brand.Logo},
+		"is_hot":      r.IsHot,
+		"is_new":      r.IsNew,
+		"on_sale":     r.OnSale,
+	})
+
+}
+
+func Delete(c *gin.Context) {
+	id := c.Param("id")
+	idInt, err := strconv.ParseInt(id, 10, 32)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	_, err = global.GoodsSrvClient.DeleteGoods(context.Background(), &proto.DeleteGoodsInfo{Id: int32(idInt)})
+	if err != nil {
+		helper.HandleGrpcErrorToHttp(err, c)
+		return
+	}
+
+	c.Status(http.StatusOK)
+	return
+}
+
+func Stock(c *gin.Context) {
+	id := c.Param("id")
+	_, err := strconv.ParseInt(id, 10, 32)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	// todo goods stock
+	return
+}
+
+func UpdateStatus(c *gin.Context) {
+	goodsStatusForm := forms.GoodsStatusForm{}
+	if err := c.ShouldBindJSON(&goodsStatusForm); err != nil {
+		helper.HandleValidatorError(c, err)
+		return
+	}
+
+	id := c.Param("id")
+	idInt, err := strconv.ParseInt(id, 10, 32)
+	if _, err = global.GoodsSrvClient.UpdateGoods(context.Background(), &proto.CreateGoodsInfo{
+		Id:     int32(idInt),
+		IsHot:  *goodsStatusForm.IsHot,
+		IsNew:  *goodsStatusForm.IsNew,
+		OnSale: *goodsStatusForm.OnSale,
+	}); err != nil {
+		helper.HandleGrpcErrorToHttp(err, c)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "succeed to update goods status",
+	})
+}
+
+func Update(c *gin.Context) {
+	goodsForm := forms.GoodsForm{}
+	if err := c.ShouldBindJSON(&goodsForm); err != nil {
+		helper.HandleValidatorError(c, err)
+		return
+	}
+
+	id := c.Param("id")
+	idInt, err := strconv.ParseInt(id, 10, 32)
+	if _, err = global.GoodsSrvClient.UpdateGoods(context.Background(), &proto.CreateGoodsInfo{
+		Id:              int32(idInt),
+		Name:            goodsForm.Name,
+		GoodsSn:         goodsForm.GoodsSn,
+		Stocks:          goodsForm.Stocks,
+		MarketPrice:     goodsForm.MarketPrice,
+		ShopPrice:       goodsForm.ShopPrice,
+		GoodsBrief:      goodsForm.GoodsBrief,
+		ShipFree:        *goodsForm.ShipFree,
+		Images:          goodsForm.Images,
+		DescImages:      goodsForm.DescImages,
+		GoodsFrontImage: goodsForm.FrontImage,
+		CategoryId:      goodsForm.CategoryId,
+		BrandId:         goodsForm.Brand,
+	}); err != nil {
+		helper.HandleGrpcErrorToHttp(err, c)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "succeed to update goods",
+	})
 }
