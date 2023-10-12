@@ -10,10 +10,14 @@ require (
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.14.0
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/golang/protobuf v1.5.3
+	github.com/hashicorp/consul/api v1.20.0
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/mbobakov/grpc-consul-resolver v1.5.2
 	github.com/mojocn/base64Captcha v1.3.5
+	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/nacos-group/nacos-sdk-go/v2 v2.2.3
+	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/viper v1.16.0
 	go.uber.org/zap v1.25.0
 	google.golang.org/grpc v1.57.0
@@ -64,6 +68,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-critic/go-critic v0.7.0 // indirect
+	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/go-playground/form v3.1.4+incompatible // indirect
 	github.com/go-toolsmith/astcast v1.1.0 // indirect
 	github.com/go-toolsmith/astcopy v1.1.0 // indirect
@@ -78,7 +83,6 @@ require (
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golangci/check v0.0.0-20180506172741-cfe4005ccda2 // indirect
 	github.com/golangci/dupl v0.0.0-20180902072040-3e9179ac440a // indirect
 	github.com/golangci/go-misc v0.0.0-20220329215616-d24fe342adfe // indirect
@@ -95,7 +99,6 @@ require (
 	github.com/gostaticanalysis/comment v1.4.2 // indirect
 	github.com/gostaticanalysis/forcetypeassert v0.1.0 // indirect
 	github.com/gostaticanalysis/nilerr v0.1.1 // indirect
-	github.com/hashicorp/consul/api v1.20.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.5.0 // indirect
