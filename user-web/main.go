@@ -57,7 +57,7 @@ func main() {
 	serviceID, _ := uuid.GenerateUUID()
 	err := registryClient.Register(global.ServerConfig.Host, global.ServerConfig.Name, serviceID, global.ServerConfig.Port, global.ServerConfig.Tags)
 	if err != nil {
-		zap.S().Panic("fail to register goods-web service", err.Error())
+		zap.S().Panic("fail to register user-web service", err.Error())
 	}
 
 	go func() {
