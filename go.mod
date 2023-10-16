@@ -18,6 +18,7 @@ require (
 	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/nacos-group/nacos-sdk-go/v2 v2.2.3
 	github.com/satori/go.uuid v1.2.0
+	github.com/smartwalle/alipay/v3 v3.2.16
 	github.com/spf13/viper v1.16.0
 	go.uber.org/zap v1.25.0
 	google.golang.org/grpc v1.57.0
@@ -177,6 +178,9 @@ require (
 	github.com/sivchari/containedctx v1.0.2 // indirect
 	github.com/sivchari/nosnakecase v1.7.0 // indirect
 	github.com/sivchari/tenv v1.7.1 // indirect
+	github.com/smartwalle/ncrypto v1.0.3 // indirect
+	github.com/smartwalle/ngx v1.0.7 // indirect
+	github.com/smartwalle/nsign v1.0.8 // indirect
 	github.com/sonatard/noctx v0.0.2 // indirect
 	github.com/sourcegraph/go-diff v0.7.0 // indirect
 	github.com/spf13/afero v1.9.5 // indirect

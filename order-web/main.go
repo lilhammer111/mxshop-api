@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin/binding"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 	"github.com/hashicorp/go-uuid"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -9,6 +12,7 @@ import (
 	"mxshop-api/order-web/initialize"
 	"mxshop-api/order-web/utils"
 	"mxshop-api/order-web/utils/register/consul"
+	customValidator "mxshop-api/order-web/validator"
 	"os"
 	"os/signal"
 	"syscall"
@@ -35,6 +39,17 @@ func main() {
 		if err == nil {
 			global.ServerConfig.Port = port
 		}
+	}
+
+	// register validator
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		_ = v.RegisterValidation("mobile", customValidator.ValidateMobile)
+		_ = v.RegisterTranslation("mobile", global.Trans, func(ut ut.Translator) error {
+			return ut.Add("mobile", "{0} 非法的手机号码!", true) // see universal-translator for details
+		}, func(ut ut.Translator, fe validator.FieldError) string {
+			t, _ := ut.T("mobile", fe.Field())
+			return t
+		})
 	}
 
 	// order-web service register
