@@ -3,10 +3,12 @@ package initialize
 import (
 	"fmt"
 	_ "github.com/mbobakov/grpc-consul-resolver"
+	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"mxshop-api/order-web/global"
 	"mxshop-api/order-web/proto"
+	"mxshop-api/order-web/utils/otgrpc"
 )
 
 func SrvConn() {
@@ -20,6 +22,7 @@ func SrvConn() {
 		grpc.WithInsecure(),
 		// 负载均衡
 		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
+		grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
 	)
 	if err != nil {
 		zap.S().Fatalln("[SrvConn] dialogue【order-srv failed】")
@@ -34,6 +37,7 @@ func SrvConn() {
 		grpc.WithInsecure(),
 		// 负载均衡
 		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
+		grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
 	)
 	if err != nil {
 		zap.S().Fatalln("[SrvConn] dialogue【goods-srv failed】")
@@ -48,6 +52,7 @@ func SrvConn() {
 		grpc.WithInsecure(),
 		// 负载均衡
 		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
+		grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
 	)
 	if err != nil {
 		zap.S().Fatalln("[SrvConn] dialogue【inventory-srv failed】")

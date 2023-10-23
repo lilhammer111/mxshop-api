@@ -8,7 +8,7 @@ import (
 )
 
 func InitShopCartRouter(Router *gin.RouterGroup) {
-	ShopCartRouter := Router.Group("shopcarts").Use(m.JWTAuth())
+	ShopCartRouter := Router.Group("shopcarts").Use(m.JWTAuth()).Use(m.Trace())
 	zap.S().Info("配置用户相关url")
 	{
 		ShopCartRouter.GET("", shop_cart.List)

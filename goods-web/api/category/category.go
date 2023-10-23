@@ -15,7 +15,7 @@ import (
 )
 
 func List(c *gin.Context) {
-	r, err := global.GoodsSrvClient.GetAllCategorysList(context.Background(), &empty.Empty{})
+	r, err := global.GoodsSrvClient.GetAllCategorysList(context.WithValue(context.Background(), "ginContext", c), &empty.Empty{})
 	if err != nil {
 		helper.HandleGrpcErrorToHttp(err, c)
 		return
@@ -42,7 +42,7 @@ func Detail(c *gin.Context) {
 
 	reMap := make(map[string]interface{})
 	subCategories := make([]interface{}, 0)
-	if r, err := global.GoodsSrvClient.GetSubCategory(context.Background(), &proto.CategoryListRequest{
+	if r, err := global.GoodsSrvClient.GetSubCategory(context.WithValue(context.Background(), "ginContext", c), &proto.CategoryListRequest{
 		Id: int32(i),
 	}); err != nil {
 		helper.HandleGrpcErrorToHttp(err, c)
@@ -77,7 +77,7 @@ func New(c *gin.Context) {
 		return
 	}
 
-	rsp, err := global.GoodsSrvClient.CreateCategory(context.Background(), &proto.CategoryInfoRequest{
+	rsp, err := global.GoodsSrvClient.CreateCategory(context.WithValue(context.Background(), "ginContext", c), &proto.CategoryInfoRequest{
 		Name:           categoryForm.Name,
 		IsTab:          *categoryForm.IsTab,
 		Level:          categoryForm.Level,
@@ -109,7 +109,7 @@ func Delete(c *gin.Context) {
 	//1. 先查询出该分类写的所有子分类
 	//2. 将所有的分类全部逻辑删除
 	//3. 将该分类下的所有的商品逻辑删除
-	_, err = global.GoodsSrvClient.DeleteCategory(context.Background(), &proto.DeleteCategoryRequest{Id: int32(i)})
+	_, err = global.GoodsSrvClient.DeleteCategory(context.WithValue(context.Background(), "ginContext", c), &proto.DeleteCategoryRequest{Id: int32(i)})
 	if err != nil {
 		helper.HandleGrpcErrorToHttp(err, c)
 		return
@@ -139,7 +139,7 @@ func Update(c *gin.Context) {
 	if categoryForm.IsTab != nil {
 		request.IsTab = *categoryForm.IsTab
 	}
-	_, err = global.GoodsSrvClient.UpdateCategory(context.Background(), request)
+	_, err = global.GoodsSrvClient.UpdateCategory(context.WithValue(context.Background(), "ginContext", c), request)
 	if err != nil {
 		helper.HandleGrpcErrorToHttp(err, c)
 		return

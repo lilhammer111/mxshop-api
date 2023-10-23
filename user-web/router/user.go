@@ -8,7 +8,7 @@ import (
 )
 
 func InitUserRouter(Router *gin.RouterGroup) {
-	UserRouter := Router.Group("user")
+	UserRouter := Router.Group("user").Use(m.Trace())
 	zap.S().Info("配置用户相关url")
 	{
 		UserRouter.GET("list", m.JWTAuth(), m.IsAdminAuth(), api.GetUserList)

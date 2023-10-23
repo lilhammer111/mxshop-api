@@ -3,10 +3,11 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"mxshop-api/goods-web/api/category"
+	m "mxshop-api/goods-web/middlewares"
 )
 
 func InitCategoryRouter(Router *gin.RouterGroup) {
-	CategoryRouter := Router.Group("categorys") // .Use(middlewares.Trace())
+	CategoryRouter := Router.Group("categorys").Use(m.Trace())
 	{
 		CategoryRouter.GET("", category.List)          // 商品类别列表页
 		CategoryRouter.DELETE("/:id", category.Delete) // 删除分类

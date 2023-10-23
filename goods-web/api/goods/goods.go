@@ -57,7 +57,7 @@ func List(c *gin.Context) {
 	request.Brand = int32(brandIdInt)
 
 	// revoke goods microservice
-	res, err := global.GoodsSrvClient.GoodsList(context.Background(), request)
+	res, err := global.GoodsSrvClient.GoodsList(context.WithValue(context.Background(), "ginContext", c), request)
 	if err != nil {
 		zap.S().Errorw("[List] 查询 【商品列表】失败")
 		helper.HandleGrpcErrorToHttp(err, c)
@@ -108,7 +108,7 @@ func New(c *gin.Context) {
 	}
 
 	goodsClient := global.GoodsSrvClient
-	rsp, err := goodsClient.CreateGoods(context.Background(), &proto.CreateGoodsInfo{
+	rsp, err := goodsClient.CreateGoods(context.WithValue(context.Background(), "ginContext", c), &proto.CreateGoodsInfo{
 		Name:            goodsForm.Name,
 		GoodsSn:         goodsForm.GoodsSn,
 		Stocks:          goodsForm.Stocks,
@@ -138,7 +138,7 @@ func Detail(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 	}
 
-	r, err := global.GoodsSrvClient.GetGoodsDetail(context.Background(), &proto.GoodInfoRequest{Id: int32(idInt)})
+	r, err := global.GoodsSrvClient.GetGoodsDetail(context.WithValue(context.Background(), "ginContext", c), &proto.GoodInfoRequest{Id: int32(idInt)})
 	if err != nil {
 		helper.HandleGrpcErrorToHttp(err, c)
 	}
@@ -170,7 +170,7 @@ func Delete(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	_, err = global.GoodsSrvClient.DeleteGoods(context.Background(), &proto.DeleteGoodsInfo{Id: int32(idInt)})
+	_, err = global.GoodsSrvClient.DeleteGoods(context.WithValue(context.Background(), "ginContext", c), &proto.DeleteGoodsInfo{Id: int32(idInt)})
 	if err != nil {
 		helper.HandleGrpcErrorToHttp(err, c)
 		return
@@ -201,7 +201,7 @@ func UpdateStatus(c *gin.Context) {
 
 	id := c.Param("id")
 	idInt, err := strconv.ParseInt(id, 10, 32)
-	if _, err = global.GoodsSrvClient.UpdateGoods(context.Background(), &proto.CreateGoodsInfo{
+	if _, err = global.GoodsSrvClient.UpdateGoods(context.WithValue(context.Background(), "ginContext", c), &proto.CreateGoodsInfo{
 		Id:     int32(idInt),
 		IsHot:  *goodsStatusForm.IsHot,
 		IsNew:  *goodsStatusForm.IsNew,
@@ -224,7 +224,7 @@ func Update(c *gin.Context) {
 
 	id := c.Param("id")
 	idInt, err := strconv.ParseInt(id, 10, 32)
-	if _, err = global.GoodsSrvClient.UpdateGoods(context.Background(), &proto.CreateGoodsInfo{
+	if _, err = global.GoodsSrvClient.UpdateGoods(context.WithValue(context.Background(), "ginContext", c), &proto.CreateGoodsInfo{
 		Id:              int32(idInt),
 		Name:            goodsForm.Name,
 		GoodsSn:         goodsForm.GoodsSn,

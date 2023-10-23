@@ -8,7 +8,7 @@ import (
 )
 
 func InitOrderRouter(Router *gin.RouterGroup) {
-	OrderRouter := Router.Group("orders").Use(m.JWTAuth())
+	OrderRouter := Router.Group("orders").Use(m.JWTAuth()).Use(m.Trace())
 	zap.S().Info("配置用户相关url")
 	{
 		OrderRouter.GET("", order.List)

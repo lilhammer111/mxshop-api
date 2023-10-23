@@ -3,10 +3,11 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"mxshop-api/goods-web/api/brands"
+	"mxshop-api/goods-web/middlewares"
 )
 
 func InitBrandRouter(Router *gin.RouterGroup) {
-	BrandRouter := Router.Group("brands") //.Use(middlewares.Trace())
+	BrandRouter := Router.Group("brands").Use(middlewares.Trace())
 	{
 		BrandRouter.GET("", brands.BrandList)          // 品牌列表页
 		BrandRouter.DELETE("/:id", brands.DeleteBrand) // 删除品牌
@@ -14,7 +15,7 @@ func InitBrandRouter(Router *gin.RouterGroup) {
 		BrandRouter.PUT("/:id", brands.UpdateBrand)    //修改品牌信息
 	}
 
-	CategoryBrandRouter := Router.Group("categorybrands")
+	CategoryBrandRouter := Router.Group("categorybrands").Use(middlewares.Trace())
 	{
 		CategoryBrandRouter.GET("", brands.CategoryBrandList)          // 类别品牌列表页
 		CategoryBrandRouter.DELETE("/:id", brands.DeleteCategoryBrand) // 删除类别品牌
