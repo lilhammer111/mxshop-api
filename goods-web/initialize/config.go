@@ -38,7 +38,7 @@ func Config() {
 	if err != nil {
 		panic(err)
 	}
-	zap.S().Infof("配置信息: %v", global.NacosConfig)
+	//zap.S().Infof("配置信息: %v", global.NacosConfig)
 
 	// 动态监控变化
 	//v.WatchConfig()

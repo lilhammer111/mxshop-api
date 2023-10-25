@@ -27,6 +27,8 @@ func main() {
 
 	initialize.SrvConn()
 
+	initialize.TrafficLimitRules()
+
 	viper.AutomaticEnv()
 	// 如果是本地开发环境则固定端口
 	debug := viper.GetBool("MXSHOP_DEBUG")
@@ -38,9 +40,24 @@ func main() {
 	}
 
 	// goods-web service register
-	registryClient := consul.NewRegistryClient(global.ServerConfig.ConsulInfo.Host, global.ServerConfig.ConsulInfo.Port)
-	serviceID, _ := uuid.GenerateUUID()
-	err := registryClient.Register(global.ServerConfig.Host, global.ServerConfig.Name, serviceID, global.ServerConfig.Port, global.ServerConfig.Tags)
+	registryClient := consul.NewRegistryClient(
+		global.ServerConfig.ConsulInfo.Host,
+		global.ServerConfig.ConsulInfo.Port,
+	)
+	serviceID, err := uuid.GenerateUUID()
+	zap.S().Infoln("serviceID is ", serviceID)
+
+	if err != nil {
+		zap.S().Errorf("failed to generate serviceID: %s", err.Error())
+	}
+
+	err = registryClient.Register(
+		global.ServerConfig.Host,
+		global.ServerConfig.Name,
+		serviceID,
+		global.ServerConfig.Port,
+		global.ServerConfig.Tags,
+	)
 	if err != nil {
 		zap.S().Panic("fail to register goods-web service", err.Error())
 	}

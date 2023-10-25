@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	// 30天的秒数
+	// JWTExpirationInterval means seconds for 30 days
 	JWTExpirationInterval = 60 * 60 * 24 * 30
 )
 

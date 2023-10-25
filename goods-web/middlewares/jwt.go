@@ -7,6 +7,7 @@ import (
 	"mxshop-api/goods-web/global"
 	"mxshop-api/goods-web/models"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -21,6 +22,8 @@ func JWTAuth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		token = strings.Split(token, " ")[1]
+
 		j := NewJWT()
 		// parseToken 解析token包含的信息
 		claims, err := j.ParseToken(token)

@@ -3,6 +3,7 @@ package consul
 import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
+	"go.uber.org/zap"
 )
 
 type RegistryClient interface {
@@ -16,6 +17,7 @@ type Registry struct {
 }
 
 func (r *Registry) Register(address, name, id string, port int, tags []string) error {
+
 	cfg := api.DefaultConfig()
 	cfg.Address = fmt.Sprintf("%s:%d", r.Host, r.Port)
 
@@ -28,7 +30,7 @@ func (r *Registry) Register(address, name, id string, port int, tags []string) e
 		HTTP:                           fmt.Sprintf("http://%s:%d/health", address, port),
 		Timeout:                        "5s",
 		Interval:                       "5s",
-		DeregisterCriticalServiceAfter: "10s",
+		DeregisterCriticalServiceAfter: "30s",
 	}
 
 	//生成注册对象
@@ -42,6 +44,7 @@ func (r *Registry) Register(address, name, id string, port int, tags []string) e
 
 	err = client.Agent().ServiceRegister(registration)
 	if err != nil {
+		zap.S().Info("consul register error: ", err)
 		return err
 	}
 	return nil

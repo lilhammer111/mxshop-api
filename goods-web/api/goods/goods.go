@@ -2,6 +2,8 @@ package goods
 
 import (
 	"context"
+	sentinel "github.com/alibaba/sentinel-golang/api"
+	"github.com/alibaba/sentinel-golang/core/base"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"mxshop-api/goods-web/api/helper"
@@ -56,6 +58,14 @@ func List(c *gin.Context) {
 	brandIdInt, _ := strconv.Atoi(brandId)
 	request.Brand = int32(brandIdInt)
 
+	e, b := sentinel.Entry("goods-list", sentinel.WithTrafficType(base.Inbound))
+	if b != nil {
+		c.JSON(http.StatusTooManyRequests, gin.H{
+			"msg": "requests are too frequent, please try again later",
+		})
+		return
+	}
+
 	// revoke goods microservice
 	res, err := global.GoodsSrvClient.GoodsList(context.WithValue(context.Background(), "ginContext", c), request)
 	if err != nil {
@@ -63,6 +73,8 @@ func List(c *gin.Context) {
 		helper.HandleGrpcErrorToHttp(err, c)
 		return
 	}
+
+	e.Exit()
 
 	reMap := map[string]any{
 		"total": res.Total,
